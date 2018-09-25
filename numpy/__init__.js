@@ -2958,6 +2958,23 @@ var $builtinmodule = function (name) {
   mean_f.$defaults = [null, Sk.builtin.none.none$, Sk.builtin.none.none$, Sk.builtin.none.none$, Sk.builtin.bool.false$];
   mod.mean = new Sk.builtin.func(mean_f);
 
+  var maximum_f = function (x, y) {
+    Sk.builtin.pyCheckArgs("maximum", arguments, 2, 2);
+    var length = Sk.builtin.int_(PyArray_SIZE(x));
+    if (length.v != Sk.builtin.int_(PyArray_SIZE(y)).v) {
+        throw new Sk.builtin.ValueError("not at same dimension");
+    }
+    var x_data = PyArray_DATA(x);
+    var y_data = PyArray_DATA(y);
+    for (var i = 0; i < length.v; i++) {
+        x_data[i] = x_data[i] >= y_data[i] ? x_data[i] : y_data[i];
+    }
+    return x_data;
+  }
+  maximum_f.co_varnames = ['x', 'y'];
+  maximum_f.$defaults = [null, null];
+  mod.maximum = new Sk.builtin.func(maximum_f);
+
  var sum_f = function (x, axis, dtype, out, keepdims) {
     Sk.builtin.pyCheckArgs("sum", arguments, 1, 5);
     var ret;
