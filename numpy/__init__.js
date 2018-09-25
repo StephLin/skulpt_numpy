@@ -2963,8 +2963,21 @@ var $builtinmodule = function (name) {
     if (!PyArray_Check(x) && !PyArray_Check(y)) {
         return x > y ? x : y;
     }
-    if (!PyArray_Check(x) || !PyArray_Check(y)) {
-        throw new Sk.builtin.ValueError("x and y are not as same dimension");
+    if (!PyArray_Check(x) && PyArray_Check(y)) {
+        var val = x.v;
+        var list = tolist(PyArray_DATA(y), PyArray_DIMS(y), PyArray_STRIDES(y), 0, PyArray_DESCR(y));
+        x = Sk.misceval.callsim(mod.array, list);
+        for (var i = 0; i < y.v.buffer.length; i++) {
+            x.v.buffer[i].v = val;
+        }
+    }
+    else if (PyArray_Check(x) && !PyArray_Check(y)) {
+        var val = y.v;
+        var list = tolist(PyArray_DATA(x), PyArray_DIMS(x), PyArray_STRIDES(x), 0, PyArray_DESCR(x));
+        y = Sk.misceval.callsim(mod.array, list);
+        for (var i = 0; i < x.v.buffer.length; i++) {
+            y.v.buffer[i].v = val;
+        }
     }
     var length = Sk.builtin.int_(PyArray_SIZE(x));
     if (length.v != Sk.builtin.int_(PyArray_SIZE(y)).v) {
@@ -2974,10 +2987,11 @@ var $builtinmodule = function (name) {
         x.v.buffer[i] = x.v.buffer[i].v > y.v.buffer[i].v ? x.v.buffer[i] : y.v.buffer[i];
     }
     return x;
- }
- maximum_f.co_varnames = ['x', 'y'];
- maximum_f.$defaults = [null, null];
- mod.maximum = new Sk.builtin.func(maximum_f);
+  }
+  maximum_f.co_varnames = ['x', 'y'];
+  maximum_f.$defaults = [null, null];
+  mod.maximum = new Sk.builtin.func(maximum_f);
+
 
  var sum_f = function (x, axis, dtype, out, keepdims) {
     Sk.builtin.pyCheckArgs("sum", arguments, 1, 5);
